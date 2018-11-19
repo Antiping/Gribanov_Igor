@@ -1,0 +1,77 @@
+---
+title: 'Итоговое задание'
+author: "Грибанов Игорь"
+output: 
+  html_document:
+  highlight: monochrome
+number_sections: yes
+toc: yes
+lang: ru-RU
+---
+  
+  ```{r, message=FALSE, warning=FALSE}  
+library(tidyverse)
+library(skimr)
+library(rio)
+library(corrplot)
+library(tidyr)
+```
+# Описательный анализ данных
+```{r, message = FALSE, warning=FALSE}  
+df <- import("Electric Bill Data.txt")
+glimpse(df)
+skim(df)
+str(df)
+head(df)
+tail(df)
+```
+- В наборе данных 13 переменных
+- 120 наблюдений
+### Тема для графиков:
+```{r} 
+theme_i <- function() {
+  theme_minimal() +
+    theme(
+      text = element_text(color = "gray25"),
+      plot.subtitle = element_text(size = 12),
+      plot.caption = element_text(color = "gray30"),
+      plot.background = element_rect(fill = "gray95"),
+      plot.margin = unit(c(5, 10, 5, 10), units = "mm")
+    )
+}
+```
+##Построение графиков:
+#### Количественные переменные:
+```{r, message = FALSE, warning=FALSE} 
+ggplot(df) +
+  geom_histogram(aes(x = CONSUMPTION)) +
+  labs(x = 'Потребление', y = 'Распределение потребления энергии', title = 'Использование энергии по месяцам') +
+  theme_i()
+```
+#### Качественные переменные:
+```{r, message = FALSE, warning=FALSE} 
+ggplot(df %>% group_by(MONTH) %>% summarise(median_cons = median(CONSUMPTION)))+
+  geom_point(aes(x =MONTH, y = median_cons)) +
+  labs(x = 'Месяц', y = 'Потребление энергии', title = 'Потребление энергии по месяцам') +
+  theme_i()
+```
+```{r, message = FALSE, warning=FALSE} 
+ggplot(df %>% filter(YEAR == 1996) %>% group_by(MONTH) %>% summarise(median_cons = median(CONSUMPTION)))+
+  geom_point(aes(x =MONTH, y = median_cons)) +
+  labs(x = 'Месяц', y = 'Потребление энергии', title = 'Использование энергии по месяцам в 1996') +
+  theme_i()
+```
+```{r, message = FALSE, warning=FALSE} 
+ggplot(df %>% group_by(TEMP) %>% summarise(median_cons = median(CONSUMPTION)))+
+  geom_point(aes(x =TEMP, y = median_cons)) +
+  labs(x = 'Месяц', y = 'Средняя температура', title = 'Средняя температура по месяцам') +
+  theme_i()
+```
+## Корреляционная матрица:
+```{r, message = FALSE, warning=FALSE} 
+df_new <- data.frame(as.integer(df$TEMP), df$SIZE, df$CONSUMPTION)
+glimpse(df_new)
+df_cor <- cor(df_new)
+df_cor
+corrplot(df_cor, method = 'number', type = 'lower')
+```
