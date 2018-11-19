@@ -1,0 +1,238 @@
+---
+  title: 'Итоговое задание'
+author: "Грибанов Игорь"
+output: 
+  html_document:
+  highlight: monochrome
+number_sections: yes
+toc: yes
+lang: ru-RU
+---
+  
+  
+  ```r
+  library(tidyverse)
+  library(skimr)
+  library(rio)
+  library(corrplot)
+  library(tidyr)
+  ```
+# Описательный анализ данных
+
+```r
+df <- import("Electric Bill Data.txt")
+glimpse(df)
+```
+
+```
+## Observations: 120
+## Variables: 13
+## $ NUM         <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,...
+## $ YEAR        <int> 1991, 1991, 1991, 1991, 1991, 1991, 1991, 1991, 19...
+## $ MONTH       <chr> "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "...
+## $ BILL        <chr> "162.1", "256.9", "151.15", "118.76", "100.71", "8...
+## $ TEMP        <dbl> 29.1, 31.5, 41.9, 53.4, 63.7, 72.9, 76.8, 75.0, 68...
+## $ HDD         <int> 1229, 999, 734, 373, 162, 4, 0, 0, 52, 326, 644, 1...
+## $ CDD         <int> 0, 0, 0, 0, 94, 211, 328, 261, 110, 18, 0, 0, 0, 0...
+## $ SIZE        <int> 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,...
+## $ METER       <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ PUMP1       <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ PUMP2       <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ RIDER_TOTAL <dbl> -0.002288, -0.002288, -0.002288, -0.000600, -0.000...
+## $ CONSUMPTION <int> 5600, 9463, 5154, 3576, 2894, 2257, 2826, 2986, 17...
+```
+
+```r
+skim(df)
+```
+
+```
+## Skim summary statistics
+##  n obs: 120 
+##  n variables: 13 
+## 
+## -- Variable type:character ----------------------------------------------------------------------------------------------
+##  variable missing complete   n min max empty n_unique
+##      BILL       0      120 120   1   6     0      118
+##     MONTH       0      120 120   3   3     0       12
+## 
+## -- Variable type:integer ------------------------------------------------------------------------------------------------
+##     variable missing complete   n    mean      sd   p0     p25    p50
+##          CDD       0      120 120   85.17  113.92    0    0       9  
+##  CONSUMPTION       0      120 120 3371.87 2581.42  264 1796    2601.5
+##          HDD       0      120 120  464.33  434.77    0   40     349.5
+##        METER       0      120 120    0.13    0.34    0    0       0  
+##          NUM       0      120 120   60.5    34.79    1   30.75   60.5
+##        PUMP1       0      120 120    0.4     0.49    0    0       0  
+##        PUMP2       0      120 120    0.22    0.42    0    0       0  
+##         SIZE       0      120 120    3.71    0.52    2    3       4  
+##         YEAR       0      120 120 1995.51    2.88 1991 1993    1995.5
+##      p75  p100     hist
+##   135.25   328 <U+2587><U+2581><U+2582><U+2581><U+2581><U+2581><U+2581><U+2581>
+##  4499.5  13784 <U+2587><U+2587><U+2583><U+2582><U+2581><U+2581><U+2581><U+2581>
+##   800.25  1229 <U+2587><U+2582><U+2583><U+2581><U+2583><U+2581><U+2583><U+2582>
+##     0        1 <U+2587><U+2581><U+2581><U+2581><U+2581><U+2581><U+2581><U+2581>
+##    90.25   120 <U+2587><U+2587><U+2587><U+2587><U+2587><U+2587><U+2587><U+2587>
+##     1        1 <U+2587><U+2581><U+2581><U+2581><U+2581><U+2581><U+2581><U+2585>
+##     0        1 <U+2587><U+2581><U+2581><U+2581><U+2581><U+2581><U+2581><U+2582>
+##     4        4 <U+2581><U+2581><U+2581><U+2582><U+2581><U+2581><U+2581><U+2587>
+##  1998     2000 <U+2587><U+2585><U+2583><U+2583><U+2583><U+2583><U+2583><U+2587>
+## 
+## -- Variable type:numeric ------------------------------------------------------------------------------------------------
+##     variable missing complete   n    mean      sd     p0     p25      p50
+##  RIDER_TOTAL       0      120 120 -0.0026  0.0045 -0.012 -0.0033 -0.00094
+##         TEMP       0      120 120 53.77   17.09   29.1   39.55   55.1    
+##       p75    p100     hist
+##   0.00058  0.0032 <U+2582><U+2582><U+2581><U+2581><U+2582><U+2585><U+2587><U+2582>
+##  69.53    76.8    <U+2587><U+2581><U+2585><U+2581><U+2585><U+2582><U+2582><U+2587>
+```
+
+```r
+str(df)
+```
+
+```
+## 'data.frame':	120 obs. of  13 variables:
+##  $ NUM        : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ YEAR       : int  1991 1991 1991 1991 1991 1991 1991 1991 1991 1991 ...
+##  $ MONTH      : chr  "Jan" "Feb" "Mar" "Apr" ...
+##  $ BILL       : chr  "162.1" "256.9" "151.15" "118.76" ...
+##  $ TEMP       : num  29.1 31.5 41.9 53.4 63.7 72.9 76.8 75 68.4 56.8 ...
+##  $ HDD        : int  1229 999 734 373 162 4 0 0 52 326 ...
+##  $ CDD        : int  0 0 0 0 94 211 328 261 110 18 ...
+##  $ SIZE       : int  4 4 4 4 4 4 4 4 4 4 ...
+##  $ METER      : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ PUMP1      : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ PUMP2      : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ RIDER_TOTAL: num  -0.002288 -0.002288 -0.002288 -0.0006 -0.000634 ...
+##  $ CONSUMPTION: int  5600 9463 5154 3576 2894 2257 2826 2986 1774 2713 ...
+```
+
+```r
+head(df)
+```
+
+```
+##   NUM YEAR MONTH   BILL TEMP  HDD CDD SIZE METER PUMP1 PUMP2 RIDER_TOTAL
+## 1   1 1991   Jan  162.1 29.1 1229   0    4     0     0     0   -0.002288
+## 2   2 1991   Feb  256.9 31.5  999   0    4     0     0     0   -0.002288
+## 3   3 1991   Mar 151.15 41.9  734   0    4     0     0     0   -0.002288
+## 4   4 1991   Apr 118.76 53.4  373   0    4     0     0     0   -0.000600
+## 5   5 1991   May 100.71 63.7  162  94    4     0     0     0   -0.000634
+## 6   6 1991   Jun  83.97 72.9    4 211    4     0     0     0   -0.000634
+##   CONSUMPTION
+## 1        5600
+## 2        9463
+## 3        5154
+## 4        3576
+## 5        2894
+## 6        2257
+```
+
+```r
+tail(df)
+```
+
+```
+##     NUM YEAR MONTH  BILL TEMP  HDD CDD SIZE METER PUMP1 PUMP2 RIDER_TOTAL
+## 115 115 2000   Jul 91.23 76.8    0 328    3     1     1     1     3.8e-04
+## 116 116 2000   Aug 86.28 75.0    0 261    3     1     1     1     3.8e-04
+## 117 117 2000   Sep 83.97 68.4   52 110    2     1     1     1     3.8e-04
+## 118 118 2000   Oct 77.65 56.8  326  18    2     1     1     1     2.1e-05
+## 119 119 2000   Nov  72.3 43.3  644   0    2     1     1     1     2.1e-05
+## 120 120 2000   Dec 89.49 32.5 1049   0    2     1     1     1     2.1e-05
+##     CONSUMPTION
+## 115        2434
+## 116        2253
+## 117        1320
+## 118        1182
+## 119        1055
+## 120        1462
+```
+- В наборе данных 13 переменных
+- 120 наблюдений
+### Тема для графиков:
+
+```r
+theme_i <- function() {
+  theme_minimal() +
+    theme(
+      text = element_text(color = "gray25"),
+      plot.subtitle = element_text(size = 12),
+      plot.caption = element_text(color = "gray30"),
+      plot.background = element_rect(fill = "gray95"),
+      plot.margin = unit(c(5, 10, 5, 10), units = "mm")
+    )
+}
+```
+##Построение графиков:
+#### Количественные переменные:
+
+```r
+ggplot(df) +
+  geom_histogram(aes(x = CONSUMPTION)) +
+  labs(x = 'Потребление', y = 'Распределение потребления энергии', title = 'Использование энергии по месяцам') +
+  theme_i()
+```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
+#### Качественные переменные:
+
+```r
+ggplot(df %>% group_by(MONTH) %>% summarise(median_cons = median(CONSUMPTION)))+
+  geom_point(aes(x =MONTH, y = median_cons)) +
+  labs(x = 'Месяц', y = 'Потребление энергии', title = 'Потребление энергии по месяцам') +
+  theme_i()
+```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)
+
+```r
+ggplot(df %>% filter(YEAR == 1996) %>% group_by(MONTH) %>% summarise(median_cons = median(CONSUMPTION)))+
+  geom_point(aes(x =MONTH, y = median_cons)) +
+  labs(x = 'Месяц', y = 'Потребление энергии', title = 'Использование энергии по месяцам в 1996') +
+  theme_i()
+```
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png)
+
+```r
+ggplot(df %>% group_by(TEMP) %>% summarise(median_cons = median(CONSUMPTION)))+
+  geom_point(aes(x =TEMP, y = median_cons)) +
+  labs(x = 'Месяц', y = 'Средняя температура', title = 'Средняя температура по месяцам') +
+  theme_i()
+```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png)
+## Корреляционная матрица:
+
+```r
+df_new <- data.frame(as.integer(df$TEMP), df$SIZE, df$CONSUMPTION)
+glimpse(df_new)
+```
+
+```
+## Observations: 120
+## Variables: 3
+## $ as.integer.df.TEMP. <int> 29, 31, 41, 53, 63, 72, 76, 75, 68, 56, 43...
+## $ df.SIZE             <int> 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, ...
+## $ df.CONSUMPTION      <int> 5600, 9463, 5154, 3576, 2894, 2257, 2826, ...
+```
+
+```r
+df_cor <- cor(df_new)
+df_cor
+```
+
+```
+##                     as.integer.df.TEMP.   df.SIZE df.CONSUMPTION
+## as.integer.df.TEMP.           1.0000000 0.1727009     -0.4714761
+## df.SIZE                       0.1727009 1.0000000      0.3316809
+## df.CONSUMPTION               -0.4714761 0.3316809      1.0000000
+```
+
+```r
+corrplot(df_cor, method = 'number', type = 'lower')
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
